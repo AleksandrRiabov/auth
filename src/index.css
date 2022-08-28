@@ -26,6 +26,7 @@ form a {
   padding: 20px;
   color: #fff;
   position: relative;
+  overflow: hidden;
 }
 
 form {
@@ -47,6 +48,10 @@ input {
   position: relative;
 }
 
+.inputBox label {
+  margin-bottom: 5px;
+}
+
 .btn {
   height: 50px;
   border-radius: 10px;
@@ -62,9 +67,11 @@ input {
 }
 
 .errormsg {
-  transition: all 5s;
-  position: absolute;
-  top: 0;
+  padding: 15px;
+  margin: 0;
+  display: flex;
+  background: #b73333;
+  border-radius: 10px;
 }
 
 .offscreen {
