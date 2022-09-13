@@ -1,5 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom';
+import axios from '../api/axios';
+
+type Response = {
+    username: string,
+    age: number,
+    id: number | string,
+    isAdmin: boolean
+
+}
 
 const Login = () => {
 
@@ -26,6 +35,17 @@ const Login = () => {
         e.preventDefault();
         setUser("");
         setPwd("");
+
+        const response: Response[] = await axios.get("/api", {
+            headers: {
+                'Access-Control-Allow-Origin' : '*',
+                'Access-Control-Allow-Methods': "GET",
+                'Access-Control-Allow-Credentials': true,
+            }
+        });
+      
+        setErrMsg(response[0]?.username);
+        console.log(response)
     }
 
     return (
