@@ -1,19 +1,21 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import AuthContext from '../context/AuthProvider';
 import { Link } from 'react-router-dom';
 import axios from '../api/axios';
+import { AxiosError } from 'axios';
+const LOGIN_URL = "login";
+
 
 type Response = {
-    username: string,
-    age: number,
-    id: number | string,
-    isAdmin: boolean
-
+    data: { accessToken: string, roles: string[] }
 }
 
 const Login = () => {
+    const { setAuth, user: contextUser, accessToken, roles } = useContext(AuthContext);
 
+    console.log(`========${contextUser}, ${accessToken}, ${JSON.stringify(roles)}`)
     const userRef = useRef<HTMLInputElement>(null);
-    const errRef = useRef(null);
+    const errRef = useRef<HTMLParagraphElement>(null);
 
     const [user, setUser] = useState("");
     const [pwd, setPwd] = useState("");
@@ -33,23 +35,44 @@ const Login = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setUser("");
-        setPwd("");
 
-        const response: Response[] = await axios.get("/api", {
-            headers: {
-                'Access-Control-Allow-Origin' : '*',
-                'Access-Control-Allow-Methods': "GET",
-                'Access-Control-Allow-Credentials': true,
+        try {
+            const response: Response = await axios.post(LOGIN_URL, JSON.stringify({ user, pwd }), {
+                headers: { "Content-Type": "application/json" },
+                withCredentials: false,
+            });
+
+            const accessToken = response?.data.accessToken;
+            const roles = response?.data.roles;
+
+            if (setAuth) {
+                setAuth({ user, pwd, roles, accessToken });
             }
-        });
-      
-        setErrMsg(response[0]?.username);
-        console.log(response)
+
+            setUser("");
+            setPwd("");
+            setSuccess(true)
+        } catch (error: any) {
+            if (!error.response) {
+                setErrMsg("No response from server.")
+            } else if (error.response?.status === 400) {
+                setErrMsg('Missing Username or Password.');
+            } else if (error.response.status === 401) {
+                setErrMsg(error.response?.data?.message || "Incorrect username or password");
+            } else {
+                setErrMsg("Login Failed.. ")
+            }
+            if (errRef.current !== null) {
+                errRef.current.focus()
+            }
+        }
     }
 
     return (
-        success ? (<h1>Logged In</h1>) : (
+        success ? <section className='formWrapper'>
+        <h1>Welcome back {contextUser}</h1>
+        <Link to="/">Go to home page</Link>
+    </section> : (
             <section className='formWrapper'>
                 <p ref={errRef} className={errMsg ? "errormsg" : "ofscreen"} aria-live="assertive">{errMsg}</p>
                 <form onSubmit={handleSubmit}>
