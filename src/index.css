@@ -16,7 +16,7 @@ form a {
   color: #fff;
 }
 
-.formWrapper {
+.formWrapper, section {
   margin: 100px auto;
   width: 80%;
   max-width: 300px;

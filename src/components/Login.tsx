@@ -1,26 +1,39 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import AuthContext from '../context/AuthProvider';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import useAuth from '../hooks/useAuth';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from '../api/axios';
-import { AxiosError } from 'axios';
 const LOGIN_URL = "login";
 
 
 type Response = {
-    data: { accessToken: string, roles: string[] }
+    data: { accessToken: string, roles: number[] }
+}
+
+interface LocationState {
+    from: {
+        path: string
+    }
 }
 
 const Login = () => {
-    const { setAuth, user: contextUser, accessToken, roles } = useContext(AuthContext);
+    const { setAuth, user: currentUser } = useAuth();
 
-    console.log(`========${contextUser}, ${accessToken}, ${JSON.stringify(roles)}`)
+    const navigate = useNavigate();
+    const location: any = useLocation();
+    const from = location.state?.from?.pathname || '/';
+
     const userRef = useRef<HTMLInputElement>(null);
     const errRef = useRef<HTMLParagraphElement>(null);
 
     const [user, setUser] = useState("");
     const [pwd, setPwd] = useState("");
     const [errMsg, setErrMsg] = useState("");
-    const [success, setSuccess] = useState(false);
+
+    useEffect(() => {
+        if (currentUser) {
+            navigate('/')
+        }
+    })
 
     useEffect(() => {
         if (userRef.current !== null) {
@@ -30,7 +43,7 @@ const Login = () => {
 
     useEffect(() => {
         setErrMsg("");
-    }, [user, pwd])
+    }, [user, pwd]);
 
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -51,7 +64,7 @@ const Login = () => {
 
             setUser("");
             setPwd("");
-            setSuccess(true)
+            navigate(from, { replace: true });
         } catch (error: any) {
             if (!error.response) {
                 setErrMsg("No response from server.")
@@ -69,42 +82,38 @@ const Login = () => {
     }
 
     return (
-        success ? <section className='formWrapper'>
-        <h1>Welcome back {contextUser}</h1>
-        <Link to="/">Go to home page</Link>
-    </section> : (
-            <section className='formWrapper'>
-                <p ref={errRef} className={errMsg ? "errormsg" : "ofscreen"} aria-live="assertive">{errMsg}</p>
-                <form onSubmit={handleSubmit}>
-                    <h1>Sign In</h1>
-                    <div className='inputBox'>
-                        <label htmlFor='user'>Enter user name:</label>
-                        <input
-                            id="user"
-                            type="text"
-                            ref={userRef}
-                            value={user}
-                            required
-                            onChange={(e) => setUser(e.target.value)}
-                        />
-                    </div>
-                    <div className='inputBox'>
-                        <label htmlFor='password'>Enter password:</label>
-                        <input
-                            id="password"
-                            type="password"
-                            required
-                            value={pwd}
-                            onChange={(e) => setPwd(e.target.value)}
-                        />
-                    </div>
-                    <button className='btn'>Sign In</button>
-                    <div className='formLinks'>
-                        <span>Need an account?</span>
-                        <Link to="/register"> Sign Up</Link>
-                    </div>
-                </form>
-            </section>
+        (<section className='formWrapper'>
+            <p ref={errRef} className={errMsg ? "errormsg" : "ofscreen"} aria-live="assertive">{errMsg}</p>
+            <form onSubmit={handleSubmit}>
+                <h1>Sign In</h1>
+                <div className='inputBox'>
+                    <label htmlFor='user'>Enter user name:</label>
+                    <input
+                        id="user"
+                        type="text"
+                        ref={userRef}
+                        value={user}
+                        required
+                        onChange={(e) => setUser(e.target.value)}
+                    />
+                </div>
+                <div className='inputBox'>
+                    <label htmlFor='password'>Enter password:</label>
+                    <input
+                        id="password"
+                        type="password"
+                        required
+                        value={pwd}
+                        onChange={(e) => setPwd(e.target.value)}
+                    />
+                </div>
+                <button className='btn'>Sign In</button>
+                <div className='formLinks'>
+                    <span>Need an account?</span>
+                    <Link to="/register"> Sign Up</Link>
+                </div>
+            </form>
+        </section>
         )
     )
 }
