@@ -16,7 +16,7 @@ interface LocationState {
 }
 
 const Login = () => {
-    const { setAuth, user: currentUser } = useAuth();
+    const { setAuth, auth} = useAuth();
 
     const navigate = useNavigate();
     const location: any = useLocation();
@@ -30,7 +30,7 @@ const Login = () => {
     const [errMsg, setErrMsg] = useState("");
 
     useEffect(() => {
-        if (currentUser) {
+        if (auth.user) {
             navigate('/')
         }
     })

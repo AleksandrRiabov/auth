@@ -11,9 +11,7 @@ const Home = () => {
   const handleLogout = async () => {
     try {
       await axios.post(LOGOUT_URL);
-      if (setAuth) {
-        setAuth({} as IAuth);
-      }
+        setAuth({} as IAuth['auth']);
       navigate('/linkpage');
     } catch (error) {
       console.log(error)

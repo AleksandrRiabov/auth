@@ -5,20 +5,30 @@ interface AuthContextProviderProps {
 }
 
 export interface IAuth {
-    user: string;
-    pwd: string;
-    roles: number[];
-    accessToken: string;
-    setAuth?: (React.Dispatch<React.SetStateAction<IAuth>>)
+    auth: {
+        user: string;
+        pwd: string;
+        roles: number[];
+        accessToken: string;
+    }
+}
+interface ISetAuth {
+    setAuth: React.Dispatch<React.SetStateAction<{
+        user: string;
+        pwd: string;
+        roles: number[];
+        accessToken: string;
+    }>>
 }
 
-const AuthContext = createContext<IAuth>({} as IAuth);
+const AuthContext = createContext<IAuth & ISetAuth>({} as IAuth & ISetAuth);
 
 export const AuthProvider = ({ children }: AuthContextProviderProps) => {
-    const [auth, setAuth] = useState({} as IAuth);
+    const [auth, setAuth] = useState({} as IAuth['auth']);
+
 
     return (
-        <AuthContext.Provider value={{ ...auth, setAuth }}>
+        <AuthContext.Provider value={{ auth, setAuth }}>
             {children}
         </AuthContext.Provider>
     )
